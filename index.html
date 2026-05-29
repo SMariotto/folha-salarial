@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Folha de Pagamento 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  
+  <header class="topbar">
+    <div class="topbar-brand">
+      <div class="topbar-logo-wrap">
+        <img src="assets/logo-progresso.png" class="topbar-mark" alt="Logo Progresso" />
+      </div>
+      <span class="topbar-title">Folha de Pagamento</span>
+      <span class="topbar-year">2026</span>
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn" id="btnAbrirTabelas" title="Tabelas de referência">
+        <svg viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M2 6.5h14M6.5 6.5v9.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Tabelas
+      </button>
+      <button class="topbar-btn icon-only" id="btnAbrirSobre" title="Sobre a ferramenta">
+        <svg viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.4"/><path d="M9 8.5v4M9 6.5v.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </header>
+
+  
+  <main class="main">
+    <div class="page-header">
+      <p class="page-eyebrow">Cálculo automático · CLT 2026</p>
+      <h1 class="page-title">Calculadora de<br><em>Folha de Pagamento</em></h1>
+    </div>
+
+    <div class="form-card">
+      <div class="form-section">
+        <label class="field-label" for="salarioBruto">Salário bruto</label>
+        <div class="input-wrap">
+          <span class="input-prefix">R$</span>
+          <input type="text" id="salarioBruto" class="field-input" placeholder="0,00" inputmode="decimal" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-section">
+          <label class="field-label" for="dependentes">Dependentes</label>
+          <div class="select-wrap">
+            <select id="dependentes" class="field-select">
+              <option value="0">0 dependentes</option>
+              <option value="1">1 dependente</option>
+              <option value="2">2 dependentes</option>
+              <option value="3">3 dependentes</option>
+              <option value="4">4 dependentes</option>
+              <option value="5">5 dependentes</option>
+              <option value="6">6 dependentes</option>
+              <option value="7">7 dependentes</option>
+              <option value="8">8 dependentes</option>
+              <option value="9">9 dependentes</option>
+              <option value="10">10 dependentes</option>
+            </select>
+            <span class="select-arrow">
+              <svg viewBox="0 0 12 8" fill="none"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <label class="field-label">Paga pensão alimentícia?</label>
+          <div class="toggle-group">
+            <button class="toggle-btn active" id="pensaoNao" data-value="nao">Não</button>
+            <button class="toggle-btn" id="pensaoSim" data-value="sim">Sim</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section hidden" id="pensaoValorGroup">
+        <label class="field-label" for="pensaoValor">Valor da pensão</label>
+        <div class="input-wrap">
+          <span class="input-prefix">R$</span>
+          <input type="text" id="pensaoValor" class="field-input" placeholder="0,00" inputmode="decimal" autocomplete="off" />
+        </div>
+      </div>
+
+      <button class="btn-calcular" id="btnCalcular">
+        <span>Calcular</span>
+        <svg viewBox="0 0 20 20" fill="none"><path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </main>
+
+  
+  <div class="modal-overlay hidden" id="overlayResultado">
+    <div class="modal" id="modalResultado">
+      <div class="modal-header">
+        <div>
+          <p class="modal-eyebrow">Resultado do cálculo</p>
+          <h2 class="modal-title">Demonstrativo salarial</h2>
+        </div>
+        <button class="modal-close" id="fecharResultado" aria-label="Fechar">
+          <svg viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="res-block">
+          <div class="res-row gross">
+            <span class="res-label">Salário bruto</span>
+            <span class="res-value" id="resSalarioBruto">—</span>
+          </div>
+        </div>
+
+        <div class="res-block descontos">
+          <p class="res-block-title">Descontos</p>
+          <div class="res-row">
+            <span class="res-label">
+              INSS
+              <span class="res-sub" id="resAliquotaINSS"></span>
+            </span>
+            <span class="res-value neg" id="resINSS">—</span>
+          </div>
+          <div class="res-row hidden" id="rowPensao">
+            <span class="res-label">Pensão alimentícia</span>
+            <span class="res-value neg" id="resPensao">—</span>
+          </div>
+          <div class="res-row">
+            <span class="res-label">
+              Dedução IR
+              <span class="res-sub" id="resTipoDeducao"></span>
+            </span>
+            <span class="res-value neg" id="resDeducaoIR">—</span>
+          </div>
+          <div class="res-row base">
+            <span class="res-label">Base de cálculo IR</span>
+            <span class="res-value mono" id="resBaseIR">—</span>
+          </div>
+          <div class="res-row">
+            <span class="res-label">
+              Imposto de renda
+              <span class="res-sub" id="resAliquotaIR"></span>
+            </span>
+            <span class="res-value neg" id="resIR">—</span>
+          </div>
+          <div class="res-row hidden" id="rowReducaoIR">
+            <span class="res-label">
+              Redução do IR
+              <span class="res-sub">Lei 15.270/2025</span>
+            </span>
+            <span class="res-value pos" id="resReducaoIR">—</span>
+          </div>
+        </div>
+
+        <div class="res-block liquido-block">
+          <div class="res-row liquido">
+            <span class="res-label-lg">Salário líquido</span>
+            <span class="res-value-lg" id="resLiquido">—</span>
+          </div>
+        </div>
+
+        <div class="res-tags" id="resTags"></div>
+
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="modal-overlay hidden" id="overlayTabelas">
+    <div class="modal modal-wide" id="modalTabelas">
+      <div class="modal-header">
+        <div>
+          <p class="modal-eyebrow">Vigência janeiro 2026</p>
+          <h2 class="modal-title">Tabelas de referência</h2>
+        </div>
+        <button class="modal-close" id="fecharTabelas" aria-label="Fechar">
+          <svg viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <div class="tabs-row">
+          <button class="tab-btn active" data-tab="inss">INSS</button>
+          <button class="tab-btn" data-tab="ir">Imposto de renda</button>
+          <button class="tab-btn" data-tab="reducao">Redução IR</button>
+        </div>
+
+        
+        <div class="tab-panel active" id="tab-inss">
+          <p class="tab-desc">Empregado, empregado doméstico e trabalhador avulso · Cálculo progressivo (Portaria Interministerial MPS/MF nº 13, jan/2026)</p>
+          <table class="ref-table">
+            <thead><tr><th>Faixa salarial</th><th>Alíquota</th></tr></thead>
+            <tbody>
+              <tr><td>Até R$ 1.621,00</td><td class="alq">7,5%</td></tr>
+              <tr><td>R$ 1.621,01 a R$ 2.902,84</td><td class="alq">9,0%</td></tr>
+              <tr><td>R$ 2.902,85 a R$ 4.354,27</td><td class="alq">12,0%</td></tr>
+              <tr><td>R$ 4.354,28 a R$ 8.475,55</td><td class="alq">14,0%</td></tr>
+            </tbody>
+          </table>
+          <p class="tab-note">Teto de contribuição: R$ 8.475,55. O cálculo é progressivo — cada faixa é tributada individualmente.</p>
+        </div>
+
+        
+        <div class="tab-panel hidden" id="tab-ir">
+          <p class="tab-desc">Tabela de incidência mensal · A partir de janeiro de 2026 · Lei nº 15.191/2025</p>
+          <table class="ref-table">
+            <thead><tr><th>Base de cálculo</th><th>Alíquota</th><th>Parcela a deduzir</th></tr></thead>
+            <tbody>
+              <tr><td>Até R$ 2.428,80</td><td class="alq">Isento</td><td>—</td></tr>
+              <tr><td>R$ 2.428,81 a R$ 2.826,65</td><td class="alq">7,5%</td><td>R$ 182,16</td></tr>
+              <tr><td>R$ 2.826,66 a R$ 3.751,05</td><td class="alq">15,0%</td><td>R$ 394,16</td></tr>
+              <tr><td>R$ 3.751,06 a R$ 4.664,68</td><td class="alq">22,5%</td><td>R$ 675,49</td></tr>
+              <tr><td>Acima de R$ 4.664,68</td><td class="alq">27,5%</td><td>R$ 908,73</td></tr>
+            </tbody>
+          </table>
+          <p class="tab-note">Dedução mensal por dependente: R$ 189,59 · Desconto simplificado mensal: R$ 607,20</p>
+        </div>
+
+        
+        <div class="tab-panel hidden" id="tab-reducao">
+          <p class="tab-desc">Redução do imposto sobre rendimentos mensais · Lei nº 15.270/2025 · A partir de janeiro de 2026</p>
+          <table class="ref-table">
+            <thead><tr><th>Rendimentos tributáveis</th><th>Redução</th></tr></thead>
+            <tbody>
+              <tr><td>Até R$ 5.000,00</td><td class="alq">Imposto zerado</td></tr>
+              <tr><td>R$ 5.000,01 a R$ 7.350,00</td><td class="alq">Decrescente</td></tr>
+              <tr><td>Acima de R$ 7.350,00</td><td class="alq">Sem redução</td></tr>
+            </tbody>
+          </table>
+          <p class="tab-note">Fórmula para faixa intermediária: Redução = R$ 978,62 − (0,133145 × base de cálculo IR). A redução é aplicada sobre o imposto já calculado pela tabela progressiva.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="modal-overlay hidden" id="overlaySobre">
+    <div class="modal modal-sm" id="modalSobre">
+      <div class="modal-header">
+        <div>
+          <p class="modal-eyebrow">Informações</p>
+          <h2 class="modal-title">Sobre a ferramenta</h2>
+        </div>
+        <button class="modal-close" id="fecharSobre" aria-label="Fechar">
+          <svg viewBox="0 0 18 18" fill="none"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="modal-body sobre-body">
+        <div class="sobre-item">
+          <strong>INSS progressivo</strong>
+          <p>Calculado faixa a faixa conforme a tabela vigente. Cada faixa salarial é tributada pela alíquota correspondente, não pelo total.</p>
+        </div>
+        <div class="sobre-item">
+          <strong>Imposto de renda</strong>
+          <p>A base de cálculo é o salário bruto menos INSS e deduções. O sistema usa automaticamente a dedução mais vantajosa: simplificada (R$ 607,20) ou legal (INSS + dependentes + pensão).</p>
+        </div>
+        <div class="sobre-item">
+          <strong>Redução do IR (Lei 15.270/2025)</strong>
+          <p>Para base de cálculo até R$ 5.000, o imposto é zerado. Entre R$ 5.000,01 e R$ 7.350,00, a redução é aplicada de forma decrescente.</p>
+        </div>
+        <div class="sobre-item">
+          <strong>Vigência</strong>
+          <p>Tabelas válidas a partir de janeiro de 2026. Para fins educacionais — consulte um contador para decisões oficiais.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="calc.js"></script>
+</body>
+</html>
