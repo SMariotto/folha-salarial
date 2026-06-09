@@ -40,15 +40,14 @@ function calcularIRBruto(base) {
   return { valor: 0, aliquota: 0 };
 }
 
-function calcularReducaoIR(base, irBruto) {
-  if (base <= 0 || irBruto <= 0) return 0;
-  if (base <= 5000.00) {
-    
+function calcularReducaoIR(rendimentos, baseIR, irBruto) {
+  // Lei 15.270/2025: critério é o rendimento tributável (salário bruto), não a base IR
+  if (rendimentos <= 0 || irBruto <= 0) return 0;
+  if (rendimentos <= 5000.00) {
     return irBruto;
   }
-  if (base <= 7350.00) {
-    
-    const reducao = Math.max(0, 978.62 - 0.133145 * base);
+  if (rendimentos <= 7350.00) {
+    const reducao = Math.max(0, 978.62 - 0.133145 * baseIR);
     return parseFloat(Math.min(reducao, irBruto).toFixed(2));
   }
   return 0;
@@ -63,34 +62,20 @@ function calcularFolha({ salarioBruto, dependentes, pagaPensao, valorPensao }) {
   const inss = calcularINSS(sb);
 
   
-  const deducaoLegal = inss + (ndep * DEDUCAO_DEPENDENTE) + pensao;
-  const deducaoSimp  = DESCONTO_SIMPLES;
-  const usarSimples  = deducaoSimp > deducaoLegal;
-  const deducaoUsada = usarSimples ? deducaoSimp : deducaoLegal;
-
-  
-  
-  const deducaoExtraIR = usarSimples
-    ? deducaoSimp          
-    : (ndep * DEDUCAO_DEPENDENTE) + pensao;  
-
-  
-  
-  
-  
-  
-  let baseIR;
-  if (usarSimples) {
-    baseIR = Math.max(0, sb - deducaoSimp);
-  } else {
-    baseIR = Math.max(0, sb - inss - (ndep * DEDUCAO_DEPENDENTE) - pensao);
-  }
+  // Simplificada: substitui TUDO (base = bruto - 607,20)
+  // Legal: base = bruto - INSS - dependentes - pensão
+  // Usa quem der menor base IR (maior benefício ao trabalhador)
+  const baseIR_simples = Math.max(0, sb - DESCONTO_SIMPLES);
+  const baseIR_legal   = Math.max(0, sb - inss - (ndep * DEDUCAO_DEPENDENTE) - pensao);
+  const usarSimples    = baseIR_simples < baseIR_legal;
+  const baseIR         = usarSimples ? baseIR_simples : baseIR_legal;
+  const deducaoUsada   = usarSimples ? DESCONTO_SIMPLES : (inss + (ndep * DEDUCAO_DEPENDENTE) + pensao);
 
   
   const { valor: irBruto, aliquota: irAliquota } = calcularIRBruto(baseIR);
 
   
-  const reducaoIR = calcularReducaoIR(baseIR, irBruto);
+  const reducaoIR = calcularReducaoIR(sb, baseIR, irBruto);
   const irLiquido = parseFloat(Math.max(0, irBruto - reducaoIR).toFixed(2));
 
   
