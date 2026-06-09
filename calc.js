@@ -78,8 +78,10 @@ function calcularFolha({ salarioBruto, dependentes, pagaPensao, valorPensao }) {
   const reducaoIR = calcularReducaoIR(sb, baseIR, irBruto);
   const irLiquido = parseFloat(Math.max(0, irBruto - reducaoIR).toFixed(2));
 
-  
-  
+  const deducaoLegal = dependentes*189.59+pensao
+  if (deducaoLegal<607.20) {
+    baseIR = salarioBruto-inss-607.20
+  } else {}
   
   
   const liquido = parseFloat(Math.max(0, sb - inss - irLiquido - pensao).toFixed(2));
