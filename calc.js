@@ -13,8 +13,8 @@ const TABELA_IR = [
   { base: Infinity,   aliquota: 0.275, parcela: 908.73 },
 ];
 
-const DEDUCAO_DEPENDENTE = 189.59;  
-const DESCONTO_SIMPLES   = 607.20;  
+const DEDUCAO_DEPENDENTE = 189.59;
+const DESCONTO_SIMPLES   = 607.20;
 
 function calcularINSS(salBruto) {
   let inss = 0;
@@ -41,13 +41,10 @@ function calcularIRBruto(base) {
 }
 
 function calcularReducaoIR(rendimentos, baseIR, irBruto) {
-  // Lei 15.270/2025: critério é o rendimento tributável (salário bruto), não a base IR
   if (rendimentos <= 0 || irBruto <= 0) return 0;
-  if (rendimentos <= 5000.00) {
-    return irBruto;
-  }
+  if (rendimentos <= 5000.00) return irBruto;
   if (rendimentos <= 7350.00) {
-    const reducao = Math.max(0, 978.62 - 0.133145 * baseIR);
+    const reducao = Math.max(0, 978.62 - 0.133145 * rendimentos);
     return parseFloat(Math.min(reducao, irBruto).toFixed(2));
   }
   return 0;
@@ -58,35 +55,19 @@ function calcularFolha({ salarioBruto, dependentes, pagaPensao, valorPensao }) {
   const ndep   = parseInt(dependentes)    || 0;
   const pensao = pagaPensao ? (parseFloat(valorPensao) || 0) : 0;
 
-  
   const inss = calcularINSS(sb);
 
-  
-  // Simplificada: substitui TUDO (base = bruto - 607,20)
-  // Legal: base = bruto - INSS - dependentes - pensão
-  // Usa quem der menor base IR (maior benefício ao trabalhador)
   const baseIR_simples = Math.max(0, sb - DESCONTO_SIMPLES);
   const baseIR_legal   = Math.max(0, sb - inss - (ndep * DEDUCAO_DEPENDENTE) - pensao);
   const usarSimples    = baseIR_simples < baseIR_legal;
   const baseIR         = usarSimples ? baseIR_simples : baseIR_legal;
   const deducaoUsada   = usarSimples ? DESCONTO_SIMPLES : (inss + (ndep * DEDUCAO_DEPENDENTE) + pensao);
 
-  
   const { valor: irBruto, aliquota: irAliquota } = calcularIRBruto(baseIR);
-
-  
   const reducaoIR = calcularReducaoIR(sb, baseIR, irBruto);
   const irLiquido = parseFloat(Math.max(0, irBruto - reducaoIR).toFixed(2));
 
-  const deducaoLegal = dependentes*189.59+pensao
-  if (deducaoLegal<607.20) {
-    baseIR = salarioBruto-inss-607.20
-  } else {}
-  
-  
-  const liquido = parseFloat(Math.max(0, sb - inss - irLiquido - pensao).toFixed(2));
-
-  
+  const liquido         = parseFloat(Math.max(0, sb - inss - irLiquido - pensao).toFixed(2));
   const aliqINSSEfetiva = sb > 0 ? ((inss / sb) * 100).toFixed(2) : '0.00';
 
   return {
@@ -109,14 +90,18 @@ function calcularFolha({ salarioBruto, dependentes, pagaPensao, valorPensao }) {
 function fmt(v) {
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 });
 }
-function fmtPct(v) { return (v * 100).toFixed(1) + '%'; }
+
+function fmtPct(v) {
+  return (v * 100).toFixed(1) + '%';
+}
 
 function aplicarMascara(input) {
   input.addEventListener('input', () => {
     let v = input.value.replace(/\D/g, '');
     if (!v) { input.value = ''; return; }
     input.value = (parseInt(v, 10) / 100).toLocaleString('pt-BR', {
-      minimumFractionDigits: 2, maximumFractionDigits: 2,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     });
   });
 }
@@ -126,17 +111,14 @@ function parseMoeda(str) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-
-  
   const inputSal    = document.getElementById('salarioBruto');
   const inputPensao = document.getElementById('pensaoValor');
   aplicarMascara(inputSal);
   aplicarMascara(inputPensao);
 
-  
-  let pagaPensao = false;
-  const btnNao   = document.getElementById('pensaoNao');
-  const btnSim   = document.getElementById('pensaoSim');
+  let pagaPensao  = false;
+  const btnNao    = document.getElementById('pensaoNao');
+  const btnSim    = document.getElementById('pensaoSim');
   const grpPensao = document.getElementById('pensaoValorGroup');
 
   btnNao.addEventListener('click', () => {
@@ -153,9 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
     grpPensao.classList.remove('hidden');
   });
 
-  
   document.getElementById('btnCalcular').addEventListener('click', () => {
-    const sb  = parseMoeda(inputSal.value);
+    const sb = parseMoeda(inputSal.value);
     if (!sb || sb <= 0) {
       inputSal.focus();
       inputSal.closest('.input-wrap').style.boxShadow = '0 0 0 3px rgba(124,45,18,0.2)';
@@ -178,14 +159,11 @@ document.addEventListener('DOMContentLoaded', () => {
     abrirModal('overlayResultado');
   });
 
-  
   [inputSal, inputPensao].forEach(inp => {
     inp.addEventListener('keydown', e => {
       if (e.key === 'Enter') document.getElementById('btnCalcular').click();
     });
   });
-
-  
 
   function abrirModal(id) {
     document.getElementById(id).classList.remove('hidden');
@@ -194,42 +172,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function fecharModal(id) {
     document.getElementById(id).classList.add('hidden');
-    
     if (document.querySelectorAll('.modal-overlay:not(.hidden)').length === 0) {
       document.body.style.overflow = '';
     }
   }
 
-  
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', e => {
       if (e.target === overlay) fecharModal(overlay.id);
     });
   });
 
-  
   document.getElementById('fecharResultado').addEventListener('click', () => fecharModal('overlayResultado'));
   document.getElementById('fecharTabelas').addEventListener('click',  () => fecharModal('overlayTabelas'));
   document.getElementById('fecharSobre').addEventListener('click',    () => fecharModal('overlaySobre'));
 
-  
   document.getElementById('btnAbrirTabelas').addEventListener('click', () => abrirModal('overlayTabelas'));
   document.getElementById('btnAbrirSobre').addEventListener('click',   () => abrirModal('overlaySobre'));
 
-  
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(o => fecharModal(o.id));
     }
   });
 
-  
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.tab;
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-panel').forEach(p => {
-        p.classList.toggle('active', false);
+        p.classList.remove('active');
         p.classList.add('hidden');
       });
       btn.classList.add('active');
@@ -238,15 +210,13 @@ document.addEventListener('DOMContentLoaded', () => {
       panel.classList.add('active');
     });
   });
-
 });
 
 function exibirResultado(r) {
   set('resSalarioBruto', fmt(r.salarioBruto));
-  set('resINSS',        '− ' + fmt(r.inss));
+  set('resINSS',         '− ' + fmt(r.inss));
   set('resAliquotaINSS', 'Alíquota efetiva: ' + r.aliqINSSEfetiva + '%');
 
-  
   const rowPensao = document.getElementById('rowPensao');
   if (r.pagaPensao && r.pensao > 0) {
     rowPensao.classList.remove('hidden');
@@ -255,11 +225,10 @@ function exibirResultado(r) {
     rowPensao.classList.add('hidden');
   }
 
-  set('resDeducaoIR',    '− ' + fmt(r.deducaoUsada));
-  set('resTipoDeducao',  r.tipoDeducao);
-  set('resBaseIR',       fmt(r.baseIR));
+  set('resDeducaoIR',   '− ' + fmt(r.deducaoUsada));
+  set('resTipoDeducao', r.tipoDeducao);
+  set('resBaseIR',      fmt(r.baseIR));
 
-  
   if (r.irBruto === 0) {
     set('resIR', fmt(0));
     set('resAliquotaIR', 'Isento');
@@ -270,7 +239,6 @@ function exibirResultado(r) {
     document.getElementById('resIR').className = 'res-value neg';
   }
 
-  
   const rowReducao = document.getElementById('rowReducaoIR');
   if (r.reducaoIR > 0) {
     rowReducao.classList.remove('hidden');
@@ -281,9 +249,8 @@ function exibirResultado(r) {
 
   set('resLiquido', fmt(r.liquido));
 
-  
   const tags = [];
-  if (r.irLiquido === 0 && r.salarioBruto > 0) tags.push({ txt: 'Isento de IR', cls: 'tag-isento' });
+  if (r.irLiquido === 0 && r.salarioBruto > 0) tags.push({ txt: 'Isento de IR',        cls: 'tag-isento'  });
   if (r.reducaoIR > 0 && r.irLiquido > 0)      tags.push({ txt: 'Redução IR aplicada', cls: 'tag-reducao' });
   if (r.tipoDeducao === 'Simplificada')          tags.push({ txt: 'Dedução simplificada' });
   else                                            tags.push({ txt: 'Dedução legal' });
